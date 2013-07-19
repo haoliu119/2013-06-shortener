@@ -2,6 +2,7 @@ require 'sinatra'
 require "sinatra/reloader" if development?
 require 'active_record'
 require 'pry'
+require 'zlib'
 
 configure :development, :production do
     ActiveRecord::Base.establish_connection(
@@ -44,16 +45,27 @@ eos
 class Link < ActiveRecord::Base
 end
 
+shao = {}
+
 get '/' do
     form
 end
 
 post '/new' do
-    # PUT CODE HERE TO CREATE NEW SHORTENED LINKS
+    short = Zlib::crc32(params[:url]).to_i.to_s(16)
+    shao[short] = params[:url]
+    "<a href='#{short}''>localhost:4567/#{short}</a>"
 end
 
 get '/jquery.js' do
     send_file 'jquery.js'
+end
+
+get '/*' do
+    input = request.path_info
+    input.slice!(0)
+    output = shao[input]
+    redirect "http://#{output}"
 end
 
 ####################################################
