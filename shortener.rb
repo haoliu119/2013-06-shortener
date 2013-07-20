@@ -43,18 +43,29 @@ eos
 #
 # http://guides.rubyonrails.org/association_basics.html
 class Link < ActiveRecord::Base
-end
+    # def initialize url
+    #     @short = Zlib::crc32(url).to_i.to_s(16)
+    #     @long = url
+    # end
 
-shao = {}
+    # attr_reader :short
+    # attr_reader :long
+end
 
 get '/' do
     form
 end
 
 post '/new' do
-    short = Zlib::crc32(params[:url]).to_i.to_s(16)
-    shao[short] = params[:url]
-    "<a href='#{short}''>localhost:4567/#{short}</a>"
+    url = params[:url]
+    short = Zlib::crc32(url).to_i.to_s(16)
+    shao = Link.find_by_short(short)
+    unless shao
+        shao = Link.new
+        shao.short = short
+        shao.long = url
+    end
+    "<a href='#{shao.short}''>localhost:4567/#{shao.short}</a>"
 end
 
 get '/jquery.js' do
@@ -64,8 +75,13 @@ end
 get '/*' do
     input = request.path_info
     input.slice!(0)
-    output = shao[input]
-    redirect "http://#{output}"
+    shao = Link.find_by_short(input)
+
+    if shao
+        redirect "http://#{shao.long}"
+    else
+        "404 not found."
+    end
 end
 
 ####################################################
