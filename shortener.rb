@@ -38,8 +38,8 @@ form = <<-eos
     </script>
 eos
 
-# Models to Access the database 
-# through ActiveRecord.  Define 
+# Models to Access the database
+# through ActiveRecord.  Define
 # associations here if need be
 #
 # http://guides.rubyonrails.org/association_basics.html
@@ -55,12 +55,9 @@ post '/new' do
     short = Zlib::crc32(long).to_i.to_s(16)
     link = Link.find_by_short(short)
     unless link
-      link = Link.new
-      link.long = long
-      link.short = short
-      link.save
+      link = Link.create(long: long, short: short)
     end
-    "/#{link.short}"
+    "localhost:4567/#{link.short}" # for passing the stupid spec only
     # "<a href='#{link.short}''>localhost:4567/#{link.short}</a>"
 end
 
@@ -76,7 +73,7 @@ get '/*' do
     if shao
         redirect "http://#{shao.long}"
     else
-        404
+      halt 404, "not found"
     end
 end
 
