@@ -10,7 +10,7 @@ set :environment, :test
 configure :test do
     ActiveRecord::Base.establish_connection(
        :adapter => 'sqlite3',
-       :database =>  'db/test.sqlite3.db'
+       :database =>  'db/dev.sqlite3.db'
      )
 end
 
@@ -55,7 +55,6 @@ describe "URL Shortener" do
     it "short-urls redirect correctly" do
       post '/new', :url => 'www.hackreactor.com'
       short_link = last_response.body
-
       get '/' + short_link.split('/')[1]
       last_response.should be_redirect 
       follow_redirect!

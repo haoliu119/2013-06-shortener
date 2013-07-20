@@ -60,7 +60,8 @@ post '/new' do
       link.short = short
       link.save
     end
-    "<a href='#{link.short}''>localhost:4567/#{link.short}</a>"
+    "/#{link.short}"
+    # "<a href='#{link.short}''>localhost:4567/#{link.short}</a>"
 end
 
 get '/jquery.js' do
@@ -75,7 +76,7 @@ get '/*' do
     if shao
         redirect "http://#{shao.long}"
     else
-        "404 not found."
+        404
     end
 end
 
