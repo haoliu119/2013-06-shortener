@@ -44,6 +44,13 @@ eos
 #
 # http://guides.rubyonrails.org/association_basics.html
 class Link < ActiveRecord::Base
+  before_create do |record|
+    record.short = self.shortenURL(record.long)
+  end
+
+  def shortenURL(long)
+    Zlib::crc32(long).to_i.to_s(16)
+  end
 end
 
 get '/' do
@@ -52,11 +59,11 @@ end
 
 post '/new' do
     long = params[:url]
-    short = Zlib::crc32(long).to_i.to_s(16)
-    link = Link.find_by_short(short)
-    unless link
-      link = Link.create(long: long, short: short)
-    end
+    # short = Zlib::crc32(long).to_i.to_s(16)
+    link = Link.find_or_create_by_long(:long => long)
+    # link = Link.find_by_short(short)
+    # unless link
+    # end
     "localhost:4567/#{link.short}" # for passing the stupid spec only
     # "<a href='#{link.short}''>localhost:4567/#{link.short}</a>"
 end
