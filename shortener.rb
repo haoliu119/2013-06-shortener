@@ -7,7 +7,8 @@ require 'zlib'
 configure :development, :production do
     ActiveRecord::Base.establish_connection(
        :adapter => 'sqlite3',
-       :database =>  'db/dev.sqlite3.db'
+       :database =>  'db/dev.sqlite3.db',
+       :pool => 20
      )
 end
 
@@ -43,13 +44,6 @@ eos
 #
 # http://guides.rubyonrails.org/association_basics.html
 class Link < ActiveRecord::Base
-    # def initialize url
-    #     @short = Zlib::crc32(url).to_i.to_s(16)
-    #     @long = url
-    # end
-
-    # attr_reader :short
-    # attr_reader :long
 end
 
 get '/' do
@@ -57,15 +51,16 @@ get '/' do
 end
 
 post '/new' do
-    url = params[:url]
-    short = Zlib::crc32(url).to_i.to_s(16)
-    shao = Link.find_by_short(short)
-    unless shao
-        shao = Link.new
-        shao.short = short
-        shao.long = url
+    long = params[:url]
+    short = Zlib::crc32(long).to_i.to_s(16)
+    link = Link.find_by_short(short)
+    unless link
+      link = Link.new
+      link.long = long
+      link.short = short
+      link.save
     end
-    "<a href='#{shao.short}''>localhost:4567/#{shao.short}</a>"
+    "<a href='#{link.short}''>localhost:4567/#{link.short}</a>"
 end
 
 get '/jquery.js' do
